@@ -2,15 +2,19 @@ from datetime import datetime
 import json
 from re import fullmatch
 
+from fastapi import Depends
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi import Response, Request
 from fastapi import status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-from app.models.models import User, Login
+from app.models.models import User
 
 
 my_second_app = FastAPI()
+security = HTTPBasic()
+
 
 fake_db = {
     'foo': User(login='foo', password='TEST1234'),
@@ -22,11 +26,10 @@ online_users = {}
 
 
 @my_second_app.post('/login')
-async def login_operation(model: Login, response: Response):
+async def login_operation(model: User, response: Response):
     if model.login in fake_db:
         if model.password == fake_db[model.login].password:
             time_key = str(datetime.now())
-            fake_db[model.login].session_token = time_key
             response.set_cookie(key='session_token', value=time_key, httponly=True)
             online_users.update({time_key: fake_db[model.login]})
             return {'message': 'Cookies are set!'}
@@ -63,5 +66,25 @@ async def get_headers(request: Request):
         # return {'message': 'Accept_language header has invalid format!'}
     result = json.dumps(required_headers, indent=2)
     return result
+
+
+def get_user_from_db(username: str) -> User:
+    return fake_db.get(username, None)
+
+
+def authenticate_user(credentials: HTTPBasicCredentials=Depends(security)):
+    user = get_user_from_db(credentials.username)
+    if user and user.password == credentials.password:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid credentials!',
+            headers={'WWW-Authenticate': 'Basic'})
+
+
+@my_second_app.get('/login')
+async def get_login_page(user : User=Depends(authenticate_user)):
+    return {'message': f'{user.login}, you have access to protected resource!'}
 
 

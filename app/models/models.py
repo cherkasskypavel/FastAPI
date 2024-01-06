@@ -10,7 +10,6 @@ class User(BaseModel):
     # name: str
     # email: int
     # age: int
-    session_token: Union[str, None] = None
 
     def is_adult(self):
         return self.age >= 18
