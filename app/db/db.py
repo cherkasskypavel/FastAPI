@@ -48,4 +48,6 @@ def get_post_details():
 def add_post_to_db(post: Post):
     new_id = get_post_id()
     POSTS_DATA[new_id] = {**post}
+    POSTS_DATA[new_id].update(get_post_details())
+
 

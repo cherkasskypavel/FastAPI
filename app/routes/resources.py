@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from fastapi import status
 
 from app.db.db import POSTS_DATA
-from app.db.db import edit_post_in_db, delete_post_in_db, get_post_id
-from app.models.models import Post, PostRequest, PostEditor, PostDetails
+from app.db.db import edit_post_in_db, delete_post_in_db, add_post_to_db
+from app.models.models import Post, PostRequest, PostEditor
 from app.models.models import User, AuthUser, Role
 from app.security.security import get_user_from_token
 
@@ -40,3 +40,7 @@ async def delete_post(post_id: int, user: AuthUser = Depends(get_user_from_token
 
 @resource_.post('/posts')
 async def add_post(post: Post, user: User=Depends(get_user_from_token())):
+    if user.login not in (Role.ADMIN, Role.USER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
+    add_post_to_db(post)
+    return {'message': 'Post added!'}
