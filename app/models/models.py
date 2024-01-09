@@ -32,11 +32,12 @@ class Login(BaseModel):
 class Post(BaseModel):
     author: str
     subject: str
-    post_time: datetime
-    is_edited: bool=False
-    edited_by: Union[str, None]=None
     text: str
 
+class PostDetails(Post):
+    post_time: datetime
+    is_edited: bool = False
+    edited_by: Union[str, None] = None
 
 class PostRequest(BaseModel):
     subject: Union[str, None] = None
@@ -52,3 +53,7 @@ class Role(Enum):
     ADMIN = 'admin'
     USER = 'user'
     GUEST = 'guest'
+
+class AuthUser(BaseModel):
+    username: str
+    role: Role

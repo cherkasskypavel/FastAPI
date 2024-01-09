@@ -1,13 +1,12 @@
-from datetime import datetime
-
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import status
 
 from app.db.db import POSTS_DATA
-from app.models.models import Post, PostRequest, PostEditor
-from app.models.models import User
+from app.db.db import edit_post_in_db, delete_post_in_db, get_post_id
+from app.models.models import Post, PostRequest, PostEditor, PostDetails
+from app.models.models import User, AuthUser, Role
 from app.security.security import get_user_from_token
 
 
@@ -24,44 +23,20 @@ async def get_posts(model: PostRequest):
 
 
 @resource_.patch('/posts')
-async def edit_post(editor: PostEditor, user: User=Depends(get_user_from_token())):
-    current_user = get_user_from_db(user.login)
-    if current_user:
-        if current_user.role != 'admin':
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You must be admin to edit posts!')
-        POSTS_DATA[editor.post_id]['text'] = editor.text
-        return {'message': 'Post successfully edited!'}
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'User {user.login} already doesnt exists!')
+async def edit_post(editor: PostEditor, user: AuthUser=Depends(get_user_from_token())):
+    if user.role not in (Role.ADMIN, Role.USER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit posts!')
+    await edit_post_in_db(editor, user.login)
+    return {'message': f'Post {editor.post_id} edited!'}
 
 
 @resource_.delete('/posts')
-async def delete_post(post_id: int, user: User=Depends(get_user_from_token())):
-    current_user = get_user_from_db(user.login)
-    if current_user:
-        if current_user.role != 'admin':
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You must be admin to delete posts!')
-        if POSTS_DATA.get(post_id, None):
-            del POSTS_DATA[post_id]
-            return {'message': f'Post {post_id} edited!'}
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post {post_id} not found!')
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail=f'User {user.login} already doesnt exists!')
+async def delete_post(post_id: int, user: AuthUser = Depends(get_user_from_token())):
+    if user.role != Role.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not delete posts!')
+    await delete_post_in_db(post_id)
+    return {'message': f'Post {post_id} deleted!'}
 
 
 @resource_.post('/posts')
 async def add_post(post: Post, user: User=Depends(get_user_from_token())):
-    current_user = get_user_from_db(user.login)
-    if current_user:
-        if current_user.role not in ('admin', 'user'):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You must be logged in to add posts!')
-        post_id = int(datetime.utcnow().timestamp())
-        POSTS_DATA.update({post_id: {**post}})
-        return {'message': 'Post added!'}
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail=f'User {user.login} already doesnt exists!')
-
-
