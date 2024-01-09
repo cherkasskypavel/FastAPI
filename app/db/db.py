@@ -1,10 +1,10 @@
 from datetime import datetime
+from typing import Union
 
-USERS_DATA = {
-    'foo': {'login': 'foo', 'password': 'TEST1234', 'role': 'admin'},
-    'bar': {'login': 'bar', 'password': 'test1234', 'role': 'user'},
-    'baz': {'login': 'baz', 'password': 'TeSt1234', 'role': 'guest'}
-}
+from app.models.models import User
+
+
+USERS_DATA = {}
 
 
 POSTS_DATA = {
@@ -12,3 +12,9 @@ POSTS_DATA = {
        'post_time': datetime.utcnow(), 'is_edited': False, 'edited_by': None,
        'text': 'Hello, world from foo!'}
 }
+
+
+def get_user_from_db(username: str) -> Union[User, None]:
+    if username in POSTS_DATA:
+        return User(**USERS_DATA[username])
+    return
