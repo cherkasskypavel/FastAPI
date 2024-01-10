@@ -12,7 +12,7 @@ from app.security.security import get_user_from_token
 
 resource_ = APIRouter()
 
-
+#   123
 @resource_.get('/posts')
 async def get_posts(model: PostRequest):
     result = filter(lambda x: x[1]['subject'] == model.subject, POSTS_DATA.items())
