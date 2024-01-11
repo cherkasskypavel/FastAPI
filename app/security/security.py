@@ -14,10 +14,10 @@ from app.security.passwd_cryptography import verify_pass
 from app.models.models import User, AuthUser, Role
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 
 
-def get_jwt_token(user: User, exp_delta: Union[int, None] = None) -> str:
+def get_jwt_token(user: User, exp_delta: Union[int, None] = None):
     if not exp_delta:
         expire = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_DELTA)
     else:
@@ -38,12 +38,12 @@ def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
 def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token_str)
-        return AuthUser(username=payload('sub'), role=Role[payload.get('role')])
+        print(payload)
+        return AuthUser(username=payload['sub'], role=payload.get('role'))
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is expired!')
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
-
 
 def authenticate_user(username: str, password: str):
     user = get_user_from_db(username)
@@ -51,3 +51,5 @@ def authenticate_user(username: str, password: str):
         if verify_pass(password, user.password):
             return user
     return None
+
+print(Role.ADMIN.value)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union
+from typing import Union, Optional
 from enum import Enum
 
 from pydantic import BaseModel
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 class User(BaseModel):
     login: str
     password: str
-    role: Union[None, str]=None
+    role: str
 
 
     def is_adult(self):
@@ -30,29 +30,33 @@ class Login(BaseModel):
 
 
 class Post(BaseModel):
-    author: str
-    subject: str
-    text: str
+    subject: Optional[str] = None
+    text: Optional[str] = None
 
 class PostDetails(Post):
+    author: str
     post_time: datetime
     is_edited: bool = False
     edited_by: Union[str, None] = None
 
+
 class PostRequest(BaseModel):
-    subject: Union[str, None] = None
+    subject: Optional[str] = ''
     elder_first: bool = False
     limit: int = 10
 
 
 class PostEditor(BaseModel):
     post_id: int
+    subject: str
     text: str
+
 
 class Role(Enum):
     ADMIN = 'admin'
     USER = 'user'
     GUEST = 'guest'
+
 
 class AuthUser(BaseModel):
     username: str

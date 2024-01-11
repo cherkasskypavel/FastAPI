@@ -1,6 +1,6 @@
 from app.models.models import Role
 from app.security.passwd_cryptography import encrypt_pass
-from db import USERS_DATA
+from .db import USERS_DATA
 
 
 USERS_DATA['foo'] = {'login': 'foo', 'password': encrypt_pass('TEST1234'), 'role': Role.ADMIN}
