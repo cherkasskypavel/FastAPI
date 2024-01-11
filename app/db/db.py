@@ -27,9 +27,9 @@ def get_user_from_db(username: str) -> Union[User, None]:
 def edit_post_in_db(post: PostEditor, author: str):
     if post.post_id not in POSTS_DATA:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post {post.post_id} not found!')
-    target_post = POSTS_DATA[PostEditor.post_id]
-    target_post['subject'] = PostEditor.subject
-    target_post['text'] = PostEditor.text
+    target_post = POSTS_DATA[post.post_id]
+    target_post['subject'] = post.subject
+    target_post['text'] = post.text
     target_post['is_edited'] = True
     target_post['edited_by'] = author
 

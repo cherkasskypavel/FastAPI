@@ -31,13 +31,16 @@ async def get_posts():
 #         return dict(sorted(result, key=lambda x: -x[0])[:model.limit])
 
 
-# @resource_.patch('/posts')
-# async def edit_post(post_editor: PostEditor, user: AuthUser=Depends(get_user_from_token())):
-#     if user.role not in (Role.ADMIN, Role.USER):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit posts!')
-#     await edit_post_in_db(post_editor, user.login)
-#     return {'message': f'Post {post_editor.post_id} edited!'}
-#
+@resource_.patch('/posts')
+async def edit_post(post_editor: PostEditor, user: Union[AuthUser, None] = Depends(get_user_from_token)):
+    print(post_editor)
+    print(user)
+    if user.role not in (Role.ADMIN, Role.USER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit posts!')
+    edit_post_in_db(post_editor, user.username)
+    return {'message': f'Post {post_editor.post_id} edited!'}
+
+
 @resource_.delete('/delete_post/{post_id}')
 async def delete_post(post_id: int, user: Union[AuthUser, None] = Depends(get_user_from_token)):
     if user.role != Role.ADMIN:
