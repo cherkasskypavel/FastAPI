@@ -49,6 +49,8 @@ async def delete_post(post_id: int, user: Union[AuthUser, None] = Depends(get_us
     return {'message': f'Post {post_id} deleted!'}
 
 
+
+##  тестовая гет-страница
 @resource_.get('/protected_resource')
 async def get_resource(token: str = Depends(oauth2_scheme)):
     user = get_user_from_token(token)
