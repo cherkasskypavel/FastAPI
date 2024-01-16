@@ -60,5 +60,5 @@ class User(BaseModel):  # для возврата и чтения
 
 
 class UserFromToken(UserBase):
-    user_id: int
+    id: int
     role: str

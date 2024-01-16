@@ -40,7 +40,7 @@ def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
 def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token_str)
-        return schemas.UserFromToken(user_id=payload.get('user_id'),
+        return schemas.UserFromToken(id=payload.get('user_id'),
                                      email=payload.get('sub'),
                                      role=payload.get('role'),
                                      )

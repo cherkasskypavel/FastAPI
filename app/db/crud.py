@@ -51,6 +51,10 @@ def get_all_users(db: Session, limit: int):
 
 # POSTS ---------------------------------------------------------------------
 
+def get_post(db: Session, post_id: int):
+    return db.query(models.Post).get(post_id)
+
+
 def get_all_posts(db: Session, limit: int):
     return db.query(models.Post).\
         order_by(desc(models.Post.post_time)).\
@@ -87,3 +91,4 @@ def delete_post(db: Session, post_id: int):  # на уровне POF прове�
     db_post = db.query(models.Post).get(post_id)
     db.delete(db_post)
     db.commit()
+    return post_id
