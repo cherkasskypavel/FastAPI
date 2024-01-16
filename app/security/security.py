@@ -52,7 +52,7 @@ def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
 
 
-def authenticate_user(email: str, password: str, db: Session = Depends(get_db)):
+def authenticate_user(email: str, password: str, db: Session):
     user = crud.get_user_by_email(db=db, email=email)
     if user:
         if verify_pass(password, user.hashed_password):

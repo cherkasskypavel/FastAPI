@@ -16,11 +16,12 @@ auth = APIRouter()
 
 
 @auth.post('/login')
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):  #   если не будет работать, добавить Annotated
-    user = authenticate_user(form_data.username, form_data.password)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):  #   если не будет работать, добавить Annotated
+    user = authenticate_user(form_data.username, form_data.password, db=db)
     if user:
         token = get_jwt_token(user)
-        return {'message': f'Hello, {form_data.username}, token is {token}!'}
+        username = form_data.username.split('@')[0]
+        return {'message': f'Hello, {username}, token is {token}!'}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid credentials!')
 
