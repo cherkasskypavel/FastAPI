@@ -16,5 +16,10 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base() # От этого класса наследуем модели БД
 
-
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 

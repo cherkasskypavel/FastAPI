@@ -14,7 +14,7 @@ from app.security.security import get_user_from_token
 from app.security.security import oauth2_scheme
 
 from app.db import schemas, crud
-from app.db.database import SessionLocal, engine
+from app.db.database import SessionLocal, engine, get_db
 from app.db.models import Base
 
 
@@ -22,12 +22,7 @@ from app.db.models import Base
 resource_ = APIRouter()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 @resource_.get('/posts', response_model=List[schemas.Post])
 async def get_posts(limit: int, db: Session = Depends(get_db)):
@@ -35,7 +30,7 @@ async def get_posts(limit: int, db: Session = Depends(get_db)):
     return posts
 
 
-@resource_.post('/posts')
+@resource_.post('/posts')  # переделать на БД
 async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
     if user.role not in (Role.ADMIN, Role.USER):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
@@ -68,4 +63,7 @@ async def get_resource(token: str = Depends(oauth2_scheme)):
     if user.role not in (Role.ADMIN, Role.USER):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
     return {'message': f'{user.username}, You have got a protected resource'}
+
+
+
 
