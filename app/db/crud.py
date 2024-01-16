@@ -10,13 +10,14 @@ from app.security.passwd_cryptography import encrypt_pass
 # USERS ------------------------------------------------------------------
 
 def get_user(db: Session, user_id: int):
-    db_user =  db.query(models.User).get(user_id)
-    print(db_user)
+    db_user = db.query(models.User).get(user_id)
     if db_user is None:
         return
     user_name = str(db_user.email).split('@')[0]
+    posts = len(db_user.posts)
     user = schemas.User(
-        user_id=db_user.id, role=db_user.role, user_name=user_name, posts=db_user.posts)
+        id=db_user.id, role=db_user.role, user_name=user_name, posts=posts)
+    print(user)
     return user
 
 
@@ -65,21 +66,21 @@ def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id и na
     return db_post
 
 
-def edit_post(db: Session, post: schemas.PostCommitter):  # в POF по id из JWT вытаскиваем имя из БД
-    db_post = db.query(models.Post).get(post.post_id)
-    if post.text and post.text != db_post.text:
-        db_post.text = post.text
-        db_post.edited_by = post.edited_by
-        db_post.is_edited = True
-    if post.subject and post.subject != db_post.subject:
-        db_post.subject = post.subject
-        db_post.edited_by = post.edited_by
-        db_post.is_edited = True
-
-    db.add(db_post)
-    db.commit()
-    db.refresh(db_post)
-    return db_post
+# def edit_post(db: Session, post: schemas.PostCommitter):  # в POF по id из JWT вытаскиваем имя из БД
+#     db_post = db.query(models.Post).get(post.post_id)
+#     if post.text and post.text != db_post.text:
+#         db_post.text = post.text
+#         db_post.edited_by = post.edited_by
+#         db_post.is_edited = True
+#     if post.subject and post.subject != db_post.subject:
+#         db_post.subject = post.subject
+#         db_post.edited_by = post.edited_by
+#         db_post.is_edited = True
+#
+#     db.add(db_post)
+#     db.commit()
+#     db.refresh(db_post)
+#     return db_post
 
 
 def delete_post(db: Session, post_id: int):  # на уровне POF проверить существование поста

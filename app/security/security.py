@@ -10,14 +10,10 @@ from sqlalchemy.orm import Session
 
 from app.config import SECRET_KEY, ALGORITHM
 from app.config import JWT_EXPIRE_DELTA
-from app.db.db import get_user_from_db
 from app.security.passwd_cryptography import verify_pass
-from app.models.models import User, AuthUser, Role
+from app.models.models import User
 
 from app.db import crud, schemas
-from app.db.database import get_db
-
-
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 

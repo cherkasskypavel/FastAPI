@@ -6,19 +6,15 @@ from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy.orm import Session
 
-from app.db.db import POSTS_DATA
-from app.db.db import edit_post_in_db, delete_post_in_db, add_post_to_db
-from app.models.models import Post, PostRequest, PostEditor
-from app.models.models import User, AuthUser, Role
+from _buffer.db import edit_post_in_db, delete_post_in_db
+from app.models.models import PostEditor
+from app.models.models import AuthUser, Role
 from app.security.security import get_user_from_token
 from app.security.security import oauth2_scheme
 
 
 from app.db import schemas, crud
-from app.db.database import SessionLocal, engine, get_db
-from app.db.models import Base
-
-
+from app.db.database import get_db
 
 resource_ = APIRouter()
 
@@ -40,8 +36,18 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @resource_.post('/posts')
-async def add_post(post: schemas.PostBase, db: Session = Depends(get_db)):
-    request_user = get_user_from_token()
+async def add_post(post: schemas.PostBase,
+                   user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
+                   db: Session = Depends(get_db)):
+    if user.role not in ('admin', 'user'):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You can not add posts!')
+    post_to_db = schemas.PostAdder(**post.model_dump(), author_id=user.user_id)
+    added_post = crud.add_post(db=db, post=post_to_db)
+    username = user.email.split("@")[0]
+    return {'message': f'Post {added_post.post_id} by {username} succesfully added!'}
+
+
 
 # @resource_.post('/posts')  # переделать на БД
 # async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):

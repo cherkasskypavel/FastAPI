@@ -31,10 +31,7 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = get_user_by_email(db=db, email=user.email)
     if db_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'Email {user.email} already in use!')
-    try:
-        db_user = create_user(db=db, user=user)
-        username = user.email.split('@')[0]
-        return {'message': f'Success! Welcome, {username}!'}
-    except Exception as e:
-        print(e)
+    db_user = create_user(db=db, user=user)
+    username = user.email.split('@')[0]
+    return {'message': f'Success! Welcome, {username}!'}
 

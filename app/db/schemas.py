@@ -14,12 +14,12 @@ class PostAdder(PostBase):  # время добавления поста доб�
     author_id: int
 
 
-class PostEditor(PostBase):
-    post_id: int
+# class PostEditor(PostBase):
+#     post_id: int
 
 
-class PostCommitter(PostEditor):
-    edited_by: str
+# class PostCommitter(PostEditor):
+#     edited_by: str
 
 
 class Post(PostBase):
@@ -49,10 +49,11 @@ class UserRole(BaseModel):  # Для редактирования роли
 
 
 class User(BaseModel):  # для возврата и чтения
-    user_id: int
+    id: int
     user_name: str
     role: str
-    posts: List[Post] = []
+    posts: int
+    # posts: Optional[List[Post]] = None
 
     class Config:
         orm_mode = True
