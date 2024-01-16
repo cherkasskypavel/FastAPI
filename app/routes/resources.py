@@ -1,9 +1,10 @@
-from typing import Union
+from typing import Union, List
 
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import status
+from sqlalchemy.orm import Session
 
 from app.db.db import POSTS_DATA
 from app.db.db import edit_post_in_db, delete_post_in_db, add_post_to_db
@@ -12,24 +13,34 @@ from app.models.models import User, AuthUser, Role
 from app.security.security import get_user_from_token
 from app.security.security import oauth2_scheme
 
+from app.db import schemas, crud
+from app.db.database import SessionLocal, engine
+from app.db.models import Base
+
+
 
 resource_ = APIRouter()
 
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-@resource_.get('/posts')
-async def get_posts():
-    return {'message': POSTS_DATA}
+@resource_.get('/posts', response_model=List[schemas.Post])
+async def get_posts(limit: int, db: Session = Depends(get_db)):
+    posts = crud.get_all_posts(limit=limit, db=db)
+    return posts
 
 
-# @resource_.get('/posts')
-# async def get_posts(model: PostRequest):
-#     result = filter(lambda x: x[1]['subject'] == model.subject, POSTS_DATA.items())
-#     if model.elder_first:
-#         return dict(sorted(result, key=lambda x: x[0])[:model.limit])
-#     else:
-#         return dict(sorted(result, key=lambda x: -x[0])[:model.limit])
-
+@resource_.post('/posts')
+async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
+    if user.role not in (Role.ADMIN, Role.USER):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
+    add_post_to_db(post, user.username)
+    return {'message': 'Post added!'}
 
 @resource_.patch('/posts')
 async def edit_post(post_editor: PostEditor, user: Union[AuthUser, None] = Depends(get_user_from_token)):
@@ -58,10 +69,3 @@ async def get_resource(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
     return {'message': f'{user.username}, You have got a protected resource'}
 
-
-@resource_.post('/posts')
-async def add_post(post: Post, user: Union[AuthUser, None] = Depends(get_user_from_token)):
-    if user.role not in (Role.ADMIN, Role.USER):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
-    add_post_to_db(post, user.username)
-    return {'message': 'Post added!'}

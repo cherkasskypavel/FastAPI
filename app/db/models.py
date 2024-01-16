@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Integer, String, Column, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from app.db.database import Base
 
 
 # class Role(Base):
@@ -20,7 +20,7 @@ class User(Base):
     role = Column(String, default='user')
 
     posts = relationship('Post', back_populates='author')
-
+    # edited_posts = relationship('Post', back_populates='edited_by')
 
 class Post(Base):
     __tablename__ = 'posts'
@@ -31,6 +31,5 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey('users.id'))
     post_time = Column(DateTime)
     is_edited = Column(Boolean, default=False)
-    edited_by = Column(String, default=None)
-
+    # edited_by = relationship('User', back_populates='edited_posts')
     author = relationship('User', back_populates='posts')

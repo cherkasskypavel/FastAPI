@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
-from . import models, schemas
+from app.db import models, schemas
 from app.security.passwd_cryptography import encrypt_pass
 
 
@@ -49,7 +49,7 @@ def get_all_posts(db: Session, limit: int):
         limit(limit)
 
 
-def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id юзера в JWT токен
+def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id и name юзера в JWT токен
     post_time = datetime.now()
     db_post = models.Post(**post.model_dump(), post_time=post_time)
     db.add(db_post)

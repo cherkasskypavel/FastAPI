@@ -11,7 +11,7 @@ class PostBase(BaseModel):
 
 
 class PostAdder(PostBase):  # время добавления поста добавлять в функции БД
-    author: str
+    author_id: int
 
 
 class PostEditor(PostBase):
@@ -26,7 +26,7 @@ class Post(PostBase):
     post_id: int
     post_time: datetime
     author: str
-    is_edited: bool
+    is_edited: bool = False
     edited_by: Optional[str] = None
 
     class Config:

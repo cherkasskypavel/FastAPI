@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 import uvicorn
 
-from .routes.login import auth
-from .routes.resources import resource_
+from app.routes.login import auth
+from app.routes.resources import resource_
+from app.db.database import engine
+from app.db.models import Base
 
+Base.metadata.create_all(bind=engine)
 
 my_third_app = FastAPI()
 my_third_app.include_router(auth)
