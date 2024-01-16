@@ -37,3 +37,4 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         return {'message': f'Success! Welcome, {username}!'}
     except Exception as e:
         print(e)
+

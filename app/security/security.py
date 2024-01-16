@@ -14,7 +14,7 @@ from app.db.db import get_user_from_db
 from app.security.passwd_cryptography import verify_pass
 from app.models.models import User, AuthUser, Role
 
-from app.db import crud
+from app.db import crud, schemas
 from app.db.database import get_db
 
 
@@ -44,8 +44,10 @@ def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
 def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token_str)
-        print(payload)
-        return AuthUser(username=payload['sub'], role=payload.get('role'))
+        return schemas.UserFromToken(user_id=payload.get('user_id'),
+                                     email=payload.get('sub'),
+                                     role=payload.get('role'),
+                                     )
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is expired!')
     except jwt.InvalidTokenError:

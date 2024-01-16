@@ -58,3 +58,6 @@ class User(BaseModel):  # для возврата и чтения
         orm_mode = True
 
 
+class UserFromToken(UserBase):
+    user_id: int
+    role: str

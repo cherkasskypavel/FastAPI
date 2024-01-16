@@ -39,7 +39,9 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-
+@resource_.post('/posts')
+async def add_post(post: schemas.PostBase, db: Session = Depends(get_db)):
+    request_user = get_user_from_token()
 
 # @resource_.post('/posts')  # переделать на БД
 # async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
