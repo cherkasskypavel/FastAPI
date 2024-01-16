@@ -49,7 +49,8 @@ class UserRole(BaseModel):  # Для редактирования роли
 
 
 class User(BaseModel):  # для возврата и чтения
-    id: int
+    user_id: int
+    user_name: str
     role: str
     posts: List[Post] = []
 

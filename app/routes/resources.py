@@ -13,6 +13,7 @@ from app.models.models import User, AuthUser, Role
 from app.security.security import get_user_from_token
 from app.security.security import oauth2_scheme
 
+
 from app.db import schemas, crud
 from app.db.database import SessionLocal, engine, get_db
 from app.db.models import Base
@@ -30,12 +31,22 @@ async def get_posts(limit: int, db: Session = Depends(get_db)):
     return posts
 
 
-@resource_.post('/posts')  # переделать на БД
-async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
-    if user.role not in (Role.ADMIN, Role.USER):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
-    add_post_to_db(post, user.username)
-    return {'message': 'Post added!'}
+@resource_.get('/users/{user_id}', response_model=schemas.User)
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = crud.get_user(db=db, user_id=user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User doesnt exist!')
+    return user
+
+
+
+
+# @resource_.post('/posts')  # переделать на БД
+# async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
+#     if user.role not in (Role.ADMIN, Role.USER):
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
+#     add_post_to_db(post, user.username)
+#     return {'message': 'Post added!'}
 
 @resource_.patch('/posts')
 async def edit_post(post_editor: PostEditor, user: Union[AuthUser, None] = Depends(get_user_from_token)):

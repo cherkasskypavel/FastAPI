@@ -26,7 +26,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):  #   если
 
 
 @auth.post('/signup')
-async def signup(user: schemas.UserCreate, db:Union[None, Session] = Depends(get_db)):
+async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = get_user_by_email(db=db, email=user.email)
     if db_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'Email {user.email} already in use!')

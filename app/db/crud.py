@@ -10,7 +10,14 @@ from app.security.passwd_cryptography import encrypt_pass
 # USERS ------------------------------------------------------------------
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    db_user =  db.query(models.User).get(user_id)
+    print(db_user)
+    if db_user is None:
+        return
+    user_name = str(db_user.email).split('@')[0]
+    user = schemas.User(
+        user_id=db_user.id, role=db_user.role, user_name=user_name, posts=db_user.posts)
+    return user
 
 
 def get_user_by_email(db: Session, email: str):

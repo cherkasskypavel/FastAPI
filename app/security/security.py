@@ -6,12 +6,17 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+from sqlalchemy.orm import Session
 
 from app.config import SECRET_KEY, ALGORITHM
 from app.config import JWT_EXPIRE_DELTA
 from app.db.db import get_user_from_db
 from app.security.passwd_cryptography import verify_pass
 from app.models.models import User, AuthUser, Role
+
+from app.db import crud
+from app.db.database import get_db
+
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
@@ -23,7 +28,8 @@ def get_jwt_token(user: User, exp_delta: Union[int, None] = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=exp_delta)
     payload = {
-        'sub': user.login,
+        'user_id': user.id,
+        'sub': user.email,
         'role': user.role,  #   возможно, добавить name
         'exp': expire
             }
@@ -45,11 +51,11 @@ def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
 
-def authenticate_user(username: str, password: str):
-    user = get_user_from_db(username)
+
+def authenticate_user(email: str, password: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_email(db=db, email=email)
     if user:
-        if verify_pass(password, user.password):
+        if verify_pass(password, user.hashed_password):
             return user
     return None
 
-print(Role.ADMIN.value)
