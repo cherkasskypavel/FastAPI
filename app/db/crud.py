@@ -55,10 +55,10 @@ def get_post(db: Session, post_id: int):
     return db.query(models.Post).get(post_id)
 
 
-def get_all_posts(db: Session, limit: int):
+def get_all_posts(db: Session, limit: int = 100):
     return db.query(models.Post).\
         order_by(desc(models.Post.post_time)).\
-        limit(limit)
+        limit(limit).all()
 
 
 def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id и name юзера в JWT токен

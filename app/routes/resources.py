@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
 from fastapi import APIRouter
 from fastapi import Depends
@@ -22,8 +22,11 @@ resource_ = APIRouter()
 
 
 @resource_.get('/posts', response_model=List[schemas.Post])
-async def get_posts(limit: int, db: Session = Depends(get_db)):
-    posts = crud.get_all_posts(limit=limit, db=db)
+async def get_posts(limit: Optional[int] = None, db: Session = Depends(get_db)):
+    if limit:
+        posts = crud.get_all_posts(limit=limit, db=db)
+    else:
+        posts = crud.get_all_posts(db=db)
     return posts
 
 
@@ -48,7 +51,7 @@ async def add_post(post: schemas.PostBase,
     return {'message': f'Post {added_post.post_id} by {username} succesfully added!'}
 
 
-@resource_.delete('delete_post/{post_id}')
+@resource_.delete('/delete_post/{post_id}')
 async def delete_post(post_id: int,
                       user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
                       db: Session = Depends(get_db)):

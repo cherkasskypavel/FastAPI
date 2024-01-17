@@ -3,6 +3,8 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
+from app.db import models
+
 
 # POSTS ---------------------------------------------------------------------
 class PostBase(BaseModel):
@@ -21,16 +23,16 @@ class PostAdder(PostBase):  # время добавления поста доб�
 # class PostCommitter(PostEditor):
 #     edited_by: str
 
-
 class Post(PostBase):
     post_id: int
     post_time: datetime
-    author: str
+    author_id: int
     is_edited: bool = False
     edited_by: Optional[str] = None
 
     class Config:
         orm_mode = True
+
 
 
 # USERS ------------------------------------------------------
@@ -62,3 +64,5 @@ class User(BaseModel):  # для возврата и чтения
 class UserFromToken(UserBase):
     id: int
     role: str
+
+
