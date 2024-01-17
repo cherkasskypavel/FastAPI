@@ -70,21 +70,21 @@ def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id и na
     return db_post
 
 
-# def edit_post(db: Session, post: schemas.PostCommitter):  # в POF по id из JWT вытаскиваем имя из БД
-#     db_post = db.query(models.Post).get(post.post_id)
-#     if post.text and post.text != db_post.text:
-#         db_post.text = post.text
-#         db_post.edited_by = post.edited_by
-#         db_post.is_edited = True
-#     if post.subject and post.subject != db_post.subject:
-#         db_post.subject = post.subject
-#         db_post.edited_by = post.edited_by
-#         db_post.is_edited = True
-#
-#     db.add(db_post)
-#     db.commit()
-#     db.refresh(db_post)
-#     return db_post
+def edit_post(db: Session, post: schemas.PostCommitter):  # в POF по id из JWT вытаскиваем имя из БД
+    db_post = db.query(models.Post).get(post.post_id)
+    if post.text and post.text != db_post.text:
+        db_post.text = post.text
+        db_post.edited_by = post.edited_by
+        db_post.is_edited = True
+    if post.subject and post.subject != db_post.subject:
+        db_post.subject = post.subject
+        db_post.edited_by = post.edited_by
+        db_post.is_edited = True
+
+    db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+    return db_post
 
 
 def delete_post(db: Session, post_id: int):  # на уровне POF проверить существование поста
@@ -99,3 +99,5 @@ def get_user_posts(db: Session, user_id: int):
     if db_user is None:
         return
     return db_user.posts
+
+

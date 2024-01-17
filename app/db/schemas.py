@@ -16,12 +16,12 @@ class PostAdder(PostBase):  # время добавления поста доб�
     author_id: int
 
 
-# class PostEditor(PostBase):
-#     post_id: int
+class PostEditor(PostBase):
+    post_id: int
 
 
-# class PostCommitter(PostEditor):
-#     edited_by: str
+class PostCommitter(PostEditor):
+    edited_by: str
 
 class Post(PostBase):
     post_id: int

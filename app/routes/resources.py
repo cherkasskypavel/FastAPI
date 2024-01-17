@@ -72,41 +72,13 @@ async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
     return user_posts
 
 
-
-# @resource_.post('/posts')  # переделать на БД
-# async def add_post(post: schemas.PostBase, user: Union[AuthUser, None] = Depends(get_user_from_token)):
-#     if user.role not in (Role.ADMIN, Role.USER):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
-#     add_post_to_db(post, user.username)
-#     return {'message': 'Post added!'}
-#
-# @resource_.patch('/posts')
-# async def edit_post(post_editor: PostEditor, user: Union[AuthUser, None] = Depends(get_user_from_token)):
-#     print(post_editor)
-#     print(user)
-#     if user.role not in (Role.ADMIN, Role.USER):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit posts!')
-#     edit_post_in_db(post_editor, user.username)
-#     return {'message': f'Post {post_editor.post_id} edited!'}
-#
-#
-# @resource_.delete('/delete_post/{post_id}')
-# async def delete_post(post_id: int, user: Union[AuthUser, None] = Depends(get_user_from_token)):
-#     if user.role != Role.ADMIN:
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not delete posts!')
-#     delete_post_in_db(post_id)
-#     return {'message': f'Post {post_id} deleted!'}
-#
-#
-#
-# ##  тестовая гет-страница
-# @resource_.get('/protected_resource')
-# async def get_resource(token: str = Depends(oauth2_scheme)):
-#     user = get_user_from_token(token)
-#     if user.role not in (Role.ADMIN, Role.USER):
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not add posts!')
-#     return {'message': f'{user.username}, You have got a protected resource'}
-#
-#
-#
-#
+@resource_.patch('/posts/', response_model=schemas.Post)
+async def edit_post(post: schemas.PostEditor,
+                    user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
+                    db: Session = Depends(get_db)):
+    db_post = crud.get_post(db=db, post_id=post.post_id)
+    if not (user.role == 'admin' or user.id == db_post.author_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit this post!')
+    user_name = user.email.split("@")[0]
+    updated_post_data = schemas.PostCommitter(**post.model_dump(), edited_by=user_name)
+    return crud.edit_post(db=db, post=updated_post_data)
