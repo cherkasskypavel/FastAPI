@@ -64,6 +64,13 @@ async def delete_post(post_id: int,
     return {'message': f'Post {deleted_post_id} successfully deleted!'}
 
 
+@resource_.get('/users/{user_id}/posts', response_model=List[schemas.Post])
+async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
+    user_posts = crud.get_user_posts(db=db, user_id=user_id)
+    if not user_posts:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'No posts for user {user_id}')
+    return user_posts
+
 
 
 # @resource_.post('/posts')  # переделать на БД

@@ -92,3 +92,10 @@ def delete_post(db: Session, post_id: int):  # на уровне POF прове�
     db.delete(db_post)
     db.commit()
     return post_id
+
+
+def get_user_posts(db: Session, user_id: int):
+    db_user = db.query(models.User).get(user_id)
+    if db_user is None:
+        return
+    return db_user.posts
