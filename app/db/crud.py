@@ -70,7 +70,7 @@ def add_post(db: Session, post: schemas.PostAdder):  # зашиваем id и na
     return db_post
 
 
-def edit_post(db: Session, post: schemas.PostCommitter):  # в POF по id из JWT вытаскиваем имя из БД
+def edit_post(db: Session, post: schemas.PostEditor):  # в POF по id из JWT вытаскиваем имя из БД
     db_post = db.query(models.Post).get(post.post_id)
     if post.text and post.text != db_post.text:
         db_post.text = post.text

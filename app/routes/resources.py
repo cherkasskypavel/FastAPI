@@ -72,13 +72,18 @@ async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
     return user_posts
 
 
-@resource_.patch('/posts/', response_model=schemas.Post)
-async def edit_post(post: schemas.PostEditor,
+@resource_.patch('/posts/{post_id}', response_model=schemas.Post)
+async def edit_post(post_id: int,
+                    post: schemas.PostBase,
                     user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
                     db: Session = Depends(get_db)):
-    db_post = crud.get_post(db=db, post_id=post.post_id)
+    db_post = crud.get_post(db=db, post_id=post_id)
+    if not db_post:
+        return {'message': f'No posts with id {post_id}!'}
     if not (user.role == 'admin' or user.id == db_post.author_id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can not edit this post!')
     user_name = user.email.split("@")[0]
-    updated_post_data = schemas.PostCommitter(**post.model_dump(), edited_by=user_name)
+    updated_post_data = schemas.PostEditor(**post.model_dump(),
+                                           edited_by=user_name,
+                                           post_id=post_id)
     return crud.edit_post(db=db, post=updated_post_data)
