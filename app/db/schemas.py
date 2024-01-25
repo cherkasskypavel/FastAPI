@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import BaseModel
-
-from app.db import models
 
 
 # POSTS ---------------------------------------------------------------------
@@ -36,11 +34,15 @@ class Post(PostBase):
         orm_mode = True
 
 
-
 # USERS ------------------------------------------------------
 
 class UserBase(BaseModel):  # Базовый класс
     email: str
+
+
+class UserReturn(UserBase):
+    id: int
+    role: str
 
 
 class UserCreate(UserBase):  # Для создания
@@ -54,9 +56,10 @@ class UserRole(BaseModel):  # Для редактирования роли
 
 class User(BaseModel):  # для возврата и чтения
     id: int
-    user_name: str
+    email: str
+    hashed_password: str
     role: str
-    posts: int
+    # posts: int
     # posts: Optional[List[Post]] = None
 
     class Config:
@@ -66,5 +69,3 @@ class User(BaseModel):  # для возврата и чтения
 class UserFromToken(UserBase):
     id: int
     role: str
-
-
