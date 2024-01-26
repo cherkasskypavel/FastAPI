@@ -81,8 +81,16 @@ def get_post(post_id: int):
     pass
 
 
-def get_all_posts(limit: int = 100):    #   попробовать вывести через row.mappings()
-    pass
+def get_all_posts(limit: int, connection: Connection):    #   попробовать вывести через row.mappings()
+    stmt = select(tables.posts_table)\
+        .limit(limit)
+    try:
+       result = connection.execute(stmt).mappings()
+       return result
+    except DBAPIError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f'Ошибка при обращении к базе данных сообщений: {e}')
+
 
 
 def add_post(post: schemas.PostAdder, connection: Connection):  # зашиваем id и name юзера в JWT токен

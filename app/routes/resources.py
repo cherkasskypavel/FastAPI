@@ -1,3 +1,4 @@
+import datetime
 from typing import Union, List, Optional
 
 from fastapi import APIRouter
@@ -14,9 +15,10 @@ from app.security.security import get_user_from_token
 resource_ = APIRouter()
 
 
-# @resource_.get('/posts', response_model=List[schemas.Post])
-# async def get_posts(limit: Optional[int] = None, db: Session = Depends(get_db)):
-#     pass
+@resource_.get('/posts', response_model=List[schemas.Post])
+async def get_posts(limit: int = 10, connection: Connection = Depends(get_connection)):
+    result = ''
+    return result
 
 
 @resource_.get('/users/{user_id}', response_model=schemas.UserReturn)
@@ -42,9 +44,10 @@ async def add_post(post: schemas.PostBase,
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f'Вам запрещено добавлять посты.')
     else:
+        post_time = datetime.datetime.now()
         result = crud.add_post(
-            schemas.PostAdder(**post.model_dump(), author_id=user.id), connection=connection)
-        return {'message', 'Пост {result.id} успешно добавлен!'}
+            schemas.PostAdder(**post.model_dump(), author_id=user.id, post_time=post_time), connection=connection)
+        return {'message', f'Пост {result.id} успешно добавлен!'}
 
 
 # @resource_.delete('/delete_post/{post_id}')

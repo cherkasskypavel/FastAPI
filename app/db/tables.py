@@ -25,6 +25,7 @@ posts_table = Table(
     Column('subject', String, nullable=False),
     Column('text', String, nullable=False),
     Column('author_id', ForeignKey('users.id')),
+    Column('post_time', DateTime, nullable=False),
     Column('is_edited', Boolean, default=False),
     Column('edited_by', ForeignKey('users.id'), default=None)
 )
