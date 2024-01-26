@@ -4,11 +4,11 @@ from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import status
-from sqlalchemy import Connection
+from sqlalchemy.engine import Connection
 
 from app.db import schemas, crud
 from app.db.database import get_connection
-from app.security.security import oauth2_scheme
+from app.security.security import get_user_from_token
 
 
 resource_ = APIRouter()
@@ -34,11 +34,17 @@ async def get_users(limit: int = 10, connection: Connection = Depends(get_connec
     return res
 
 
-# @resource_.post('/posts')
-# async def add_post(post: schemas.PostBase,
-#                    user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
-#                    db: Session = Depends(get_db)):
-#     pass
+@resource_.post('/posts')
+async def add_post(post: schemas.PostBase,
+                   user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
+                   connection: Connection = Depends(get_connection)):
+    if user.role not in ('admin', 'user'):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'Вам запрещено добавлять посты.')
+    else:
+        result = crud.add_post(
+            schemas.PostAdder(**post.model_dump(), author_id=user.id), connection=connection)
+        return {'message', 'Пост {result.id} успешно добавлен!'}
 
 
 # @resource_.delete('/delete_post/{post_id}')

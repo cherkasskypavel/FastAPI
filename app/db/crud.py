@@ -85,8 +85,17 @@ def get_all_posts(limit: int = 100):    #   попробовать вывест�
     pass
 
 
-def add_post(post: schemas.PostAdder):  # зашиваем id и name юзера в JWT токен
-    pass
+def add_post(post: schemas.PostAdder, connection: Connection):  # зашиваем id и name юзера в JWT токен
+    stmt = insert(tables.posts_table)\
+            .returning(Column('id'))\
+            .values(**post.model_dump())
+    try:
+        result = connection.execute(stmt).fetchone()   #   возможно, добавить fetchone()
+        connection.commit()
+        return result
+    except DBAPIError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f'Ошибка при записи данных в базу: {e}')
 
 
 def edit_post(post: schemas.PostEditor):  # в POF по id из JWT вытаскиваем имя из БД

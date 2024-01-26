@@ -30,25 +30,25 @@ def get_jwt_token(user: schemas.User, exp_delta: Union[int, None] = None):
         'exp': expire
             }
     return jwt.encode(payload, key=SECRET_KEY, algorithm=ALGORITHM)
-#
-#
-# def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
-#     payload = jwt.decode(token, key=key, algorithms=[algorithm])
-#     return payload
-#
-#
-# def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
-#     try:
-#         payload = decode_token(token_str)
-#         return schemas.UserFromToken(id=payload.get('user_id'),
-#                                      email=payload.get('sub'),
-#                                      role=payload.get('role'),
-#                                      )
-#     except jwt.ExpiredSignatureError:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is expired!')
-#     except jwt.InvalidTokenError:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
-#
+
+
+def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
+    payload = jwt.decode(token, key=key, algorithms=[algorithm])
+    return payload
+
+
+def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
+    try:
+        payload = decode_token(token_str)
+        return schemas.UserFromToken(id=payload.get('id'),
+                                     email=payload.get('sub'),
+                                     role=payload.get('role'),
+                                     )
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is expired!')
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
+
 
 
 def authenticate_user(user: schemas.User, password):

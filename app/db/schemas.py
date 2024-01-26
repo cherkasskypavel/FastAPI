@@ -30,8 +30,6 @@ class Post(PostBase):
     is_edited: bool = False
     edited_by: Optional[str] = None
 
-    class Config:
-        orm_mode = True
 
 
 # USERS ------------------------------------------------------
@@ -62,8 +60,6 @@ class User(BaseModel):  # для возврата и чтения
     # posts: int
     # posts: Optional[List[Post]] = None
 
-    class Config:
-        orm_mode = True
 
 
 class UserFromToken(UserBase):
