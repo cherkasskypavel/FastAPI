@@ -27,5 +27,5 @@ posts_table = Table(
     Column('author_id', ForeignKey('users.id')),
     Column('post_time', DateTime, nullable=False),
     Column('is_edited', Boolean, default=False),
-    Column('edited_by', ForeignKey('users.id'), default=None)
+    Column('edited_by', String, default=None)
 )

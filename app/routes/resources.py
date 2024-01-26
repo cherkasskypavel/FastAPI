@@ -62,11 +62,25 @@ async def add_post(post: schemas.PostBase,
 #     pass
 
 
-# @resource_.patch('/posts/{post_id}', response_model=schemas.Post)
-# async def edit_post(post_id: int,
-#                     post: schemas.PostBase,
-#                     user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
-#                     db: Session = Depends(get_db)):
-#     pass
+@resource_.patch('/posts/{post_id}')
+async def edit_post(post_id: int,
+                    post: schemas.PostBase,
+                    user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
+                    connection: Connection = Depends(get_connection)):
+    db_post = crud.get_post(post_id, connection)
+    if db_post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                          detail=f'Пост {post_id} не найден')
+    if not (user.role == 'admin' or db_post.author_id == user.id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'Нельзя редактировать не свой пост.')
+    else:
+        editor_name = user.email.split("@")[0]
+        result = crud.edit_post(
+            schemas.PostEditor(**post.model_dump(),
+                               post_id=post_id,
+                               edited_by=editor_name),
+                connection=connection)
+        return {'message': f'Пост {post_id} отредактирован!'}
 
 

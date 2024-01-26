@@ -77,8 +77,15 @@ def get_all_users(limit: int, connection: Connection):
 
 # POSTS ---------------------------------------------------------------------
 
-def get_post(post_id: int):
-    pass
+def get_post(post_id: int, connection: Connection):
+    stmt = select(tables.posts_table)\
+        .where(Column('id') == post_id)
+    try:
+        result = connection.execute(stmt).mappings().fetchone()  # если не будет работать с User, поповать scalars
+        return schemas.Post(**result)
+    except DBAPIError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f'Ошибка при обращении к базе данных постов: {e}')
 
 
 def get_all_posts(limit: int, connection: Connection):    #   попробовать вывести через row.mappings()
@@ -106,8 +113,18 @@ def add_post(post: schemas.PostAdder, connection: Connection):  # зашивае
                             detail=f'Ошибка при записи данных в базу: {e}')
 
 
-def edit_post(post: schemas.PostEditor):  # в POF по id из JWT вытаскиваем имя из БД
-    pass
+def edit_post(post: schemas.PostEditor, connection: Connection):  # в POF по id из JWT вытаскиваем имя из БД
+    stmt = update(tables.posts_table)\
+        .where(Column('id') == post.post_id)\
+        .values(**post.model_dump(), is_edited=True)\
+        .returning(Column('id'))
+    try:
+        result = connection.execute(stmt).fetchone()
+        connection.commit()
+        return result
+    except DBAPIError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f'Ошибка при изменении поста в базе данных: {e}')
 
 
 def delete_post(post_id: int):  # на уровне POF проверить существование поста
