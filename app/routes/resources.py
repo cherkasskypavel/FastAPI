@@ -1,5 +1,5 @@
 import datetime
-from typing import Union, List, Optional
+from typing import Union, List
 
 from fastapi import APIRouter
 from fastapi import Depends
@@ -17,12 +17,13 @@ resource_ = APIRouter()
 
 @resource_.get('/posts', response_model=List[schemas.Post])
 async def get_posts(limit: int = 10, connection: Connection = Depends(get_connection)):
-    result = ''
+    result = crud.get_all_posts(limit, connection)
     return result
 
 
 @resource_.get('/users/{user_id}', response_model=schemas.UserReturn)
-async def get_user(user_id: int, connection: Connection = Depends(get_connection)):
+async def get_user(user_id: int,
+                   connection: Connection = Depends(get_connection)):
     user = crud.get_user(user_id, connection)
     if not user:
         raise HTTPException(status_code=status.HTTP_404,
@@ -31,7 +32,8 @@ async def get_user(user_id: int, connection: Connection = Depends(get_connection
 
 
 @resource_.get('/users/', response_model=List[schemas.UserReturn])
-async def get_users(limit: int = 10, connection: Connection = Depends(get_connection)):
+async def get_users(limit: int = 10,
+                    connection: Connection = Depends(get_connection)):
     res = crud.get_all_users(limit, connection)
     return res
 
@@ -42,19 +44,31 @@ async def add_post(post: schemas.PostBase,
                    connection: Connection = Depends(get_connection)):
     if user.role not in ('admin', 'user'):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f'Вам запрещено добавлять посты.')
+                            detail='Вам запрещено добавлять посты.')
     else:
         post_time = datetime.datetime.now()
         result = crud.add_post(
-            schemas.PostAdder(**post.model_dump(), author_id=user.id, post_time=post_time), connection=connection)
-        return {'message', f'Пост {result.id} успешно добавлен!'}
+                schemas.PostAdder(**post.model_dump(),
+                                  author_id=user.id,
+                                  post_time=post_time),
+                connection=connection
+        )
+        return {'message': f'Пост {result} успешно добавлен!'}
 
 
-# @resource_.delete('/delete_post/{post_id}')
-# async def delete_post(post_id: int,
-#                       user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
-#                       db: Session = Depends(get_db)):
-#     pass
+@resource_.delete('/delete_post/{post_id}')
+async def delete_post(post_id: int,
+                      user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
+                      connection: Connection = Depends(get_connection)):
+    db_post = crud.get_post(post_id, connection)
+    if db_post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Пост {post_id} не найден')
+    if not (user.role == 'admin' or db_post.author_id == user.id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='Нельзя удалять не свой пост.')
+    result = crud.delete_post(post_id, connection)
+    return {'message': f'Пост {result} удален!'}
 
 
 # @resource_.get('/users/{user_id}/posts', response_model=List[schemas.Post])
@@ -68,19 +82,19 @@ async def edit_post(post_id: int,
                     user: Union[schemas.UserFromToken, None] = Depends(get_user_from_token),
                     connection: Connection = Depends(get_connection)):
     db_post = crud.get_post(post_id, connection)
+
     if db_post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                          detail=f'Пост {post_id} не найден')
+                            detail=f'Пост {post_id} не найден')
     if not (user.role == 'admin' or db_post.author_id == user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f'Нельзя редактировать не свой пост.')
+                            detail='Нельзя редактировать не свой пост.')
     else:
         editor_name = user.email.split("@")[0]
         result = crud.edit_post(
             schemas.PostEditor(**post.model_dump(),
-                               post_id=post_id,
+                               id=post_id,
                                edited_by=editor_name),
-                connection=connection)
-        return {'message': f'Пост {post_id} отредактирован!'}
-
-
+            connection=connection
+        )
+        return {'message': f'Пост {result} отредактирован!'}

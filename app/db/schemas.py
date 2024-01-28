@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -16,7 +16,7 @@ class PostAdder(PostBase):  # время добавления поста доб�
 
 
 class PostEditor(PostBase):
-    post_id: int
+    id: int
     edited_by: str
 
 
@@ -30,7 +30,6 @@ class Post(PostBase):
     author_id: int
     is_edited: bool = False
     edited_by: Optional[str] = None
-
 
 
 # USERS ------------------------------------------------------
@@ -60,7 +59,6 @@ class User(BaseModel):  # для возврата и чтения
     role: str
     # posts: int
     # posts: Optional[List[Post]] = None
-
 
 
 class UserFromToken(UserBase):

@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from fastapi import HTTPException, status
 from sqlalchemy import Column
-from sqlalchemy import insert, select, update
-from sqlalchemy import desc, func
+from sqlalchemy import delete, insert, select, update
+from sqlalchemy import desc
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
 
@@ -82,22 +80,20 @@ def get_post(post_id: int, connection: Connection):
         .where(Column('id') == post_id)
     try:
         result = connection.execute(stmt).mappings().fetchone()  # если не будет работать с User, поповать scalars
-        return schemas.Post(**result)
+        return result
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при обращении к базе данных постов: {e}')
 
 
-def get_all_posts(limit: int, connection: Connection):    #   попробовать вывести через row.mappings()
+def get_all_posts(limit: int, connection: Connection):
     stmt = select(tables.posts_table)\
         .limit(limit)
     try:
-       result = connection.execute(stmt).mappings()
-       return result
+        return connection.execute(stmt).mappings()
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при обращении к базе данных сообщений: {e}')
-
 
 
 def add_post(post: schemas.PostAdder, connection: Connection):  # зашиваем id и name юзера в JWT токен
@@ -105,7 +101,7 @@ def add_post(post: schemas.PostAdder, connection: Connection):  # зашивае
             .returning(Column('id'))\
             .values(**post.model_dump())
     try:
-        result = connection.execute(stmt).fetchone()   #   возможно, добавить fetchone()
+        result = connection.execute(stmt).scalar_one()
         connection.commit()
         return result
     except DBAPIError as e:
@@ -115,11 +111,11 @@ def add_post(post: schemas.PostAdder, connection: Connection):  # зашивае
 
 def edit_post(post: schemas.PostEditor, connection: Connection):  # в POF по id из JWT вытаскиваем имя из БД
     stmt = update(tables.posts_table)\
-        .where(Column('id') == post.post_id)\
+        .where(Column('id') == post.id)\
         .values(**post.model_dump(), is_edited=True)\
         .returning(Column('id'))
     try:
-        result = connection.execute(stmt).fetchone()
+        result = connection.execute(stmt).scalar_one()
         connection.commit()
         return result
     except DBAPIError as e:
@@ -127,10 +123,18 @@ def edit_post(post: schemas.PostEditor, connection: Connection):  # в POF по 
                             detail=f'Ошибка при изменении поста в базе данных: {e}')
 
 
-def delete_post(post_id: int):  # на уровне POF проверить существование поста
-    pass
+def delete_post(post_id: int, connection: Connection):  # на уровне POF проверить существование поста
+    stmt = delete(tables.posts_table)\
+        .where(Column('id') == post_id)\
+        .returning(Column('id'))
+    try:
+        result = connection.execute(stmt).scalar_one()
+        connection.commit()
+        return result
+    except DBAPIError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f'Ошибка при удалении поста из базы данных: {e}')
 
 
-def get_user_posts(user_id: int):
-    pass
-
+# def get_user_posts(user_id: int):
+#     pass
