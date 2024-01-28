@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
 
 from app.db import schemas, tables
+from app.db.database import database
 from app.security.passwd_cryptography import encrypt_pass
 
 
