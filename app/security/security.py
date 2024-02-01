@@ -7,17 +7,19 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
-from app.config import SECRET_KEY, ALGORITHM
-from app.config import JWT_EXPIRE_DELTA
+# from app.config import SECRET_KEY, ALGORITHM
+# from app.config import JWT_EXPIRE_DELTA
+from app.config import load_config, Config
 from app.db import schemas
 from app.security.passwd_cryptography import verify_pass
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 
+config: Config = load_config()
 
 def get_jwt_token(user: schemas.User, exp_delta: Union[int, None] = None):
     if not exp_delta:
-        expire = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_DELTA)
+        expire = datetime.utcnow() + timedelta(minutes=config.jwt_expire_delta)
     else:
         expire = datetime.utcnow() + timedelta(minutes=exp_delta)
     payload = {
@@ -26,10 +28,10 @@ def get_jwt_token(user: schemas.User, exp_delta: Union[int, None] = None):
         'role': user.role,
         'exp': expire
             }
-    return jwt.encode(payload, key=SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, key=config.secret_key, algorithm=config.algorithm)
 
 
-def decode_token(token: str, key: str = SECRET_KEY, algorithm=ALGORITHM):
+def decode_token(token: str, key: str = config.secret_key, algorithm=config.algorithm):
     payload = jwt.decode(token, key=key, algorithms=[algorithm])
     return payload
 

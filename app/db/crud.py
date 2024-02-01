@@ -17,6 +17,7 @@ async def get_user(user_id: int):
         .where(Column('id') == user_id)
     try:
         res = await database.fetch_one(stmt)
+        print(f'сообщение из get_user: {res}')
         return res
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -47,7 +48,6 @@ async def create_user(user: schemas.UserCreate) -> schemas.UserReturn:
 
     db_user = await database.fetch_one(check_stmt)
     if db_user:
-        print(db_user.first())
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'Пользователь с почтой {user.email} уже существует!')

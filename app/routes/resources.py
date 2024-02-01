@@ -22,8 +22,8 @@ async def get_posts(limit: int = 10):
 @resource_.get('/users/{user_id}', response_model=schemas.UserReturn)
 async def get_user(user_id: int):
     user = await crud.get_user(user_id)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404,
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Пользователя с ID {user_id} нет.')
     return user
 
