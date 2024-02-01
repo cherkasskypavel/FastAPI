@@ -7,8 +7,6 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
-# from app.config import SECRET_KEY, ALGORITHM
-# from app.config import JWT_EXPIRE_DELTA
 from app.config import load_config, Config
 from app.db import schemas
 from app.security.passwd_cryptography import verify_pass
