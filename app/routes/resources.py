@@ -64,10 +64,12 @@ async def delete_post(post_id: int,
     return {'message': f'Пост {result} удален!'}
 
 
-# @resource_.get('/users/{user_id}/posts', response_model=List[schemas.Post])
-# async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
-#     pass
-
+@resource_.get('/users/{user_id}/posts', response_model=Union[List[schemas.Post], dict])
+async def get_user_posts(user_id: int, limit: int = 10):
+    res = await crud.get_all_posts(limit, user_id=user_id)
+    if not res:
+        return {'message': 'Пользователь еще не добавлял посты.'}
+    return res
 
 @resource_.patch('/posts/{post_id}')
 async def edit_post(post_id: int,

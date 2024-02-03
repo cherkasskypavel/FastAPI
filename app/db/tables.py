@@ -12,7 +12,6 @@ db_creator = APIRouter()
 
 @db_creator.post("/create_tables")
 async def create_table():
-    #   необходимо прверить в pgadmin на синтакс
     users_stmt = ("CREATE TABLE users (id SERIAL PRIMARY KEY,"
                   " email VARCHAR(255) NOT NULL UNIQUE,"
                   " hashed_password VARCHAR(255) NOT NULL,"
@@ -61,6 +60,6 @@ posts_table = Table(
     Column('text', String, nullable=False),
     Column('author_id', ForeignKey('users.id')),
     Column('post_time', DateTime, nullable=False),
-    Column('is_edited', Boolean, default=False),
-    Column('edited_by', String, default=None)
+    Column('is_edited', Boolean),
+    Column('edited_by', String)
 )

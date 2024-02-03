@@ -17,7 +17,6 @@ async def get_user(user_id: int):
         .where(Column('id') == user_id)
     try:
         res = await database.fetch_one(stmt)
-        print(f'сообщение из get_user: {res}')
         return res
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -30,10 +29,6 @@ async def get_user_by_email(email: str):
     result = await database.fetch_one(stmt)
     if result:
         return result
-        # return schemas.User(id=result.id,
-        #                     email=result.email,
-        #                     hashed_password=result.hashed_password,
-        #                     role=result.role)
     return
 
 
@@ -86,11 +81,17 @@ async def get_post(post_id: int):
                             detail=f'Ошибка при обращении к базе данных постов: {e}')
 
 
-async def get_all_posts(limit: int):
-    stmt = select(tables.posts_table)\
-        .limit(limit)
+async def get_all_posts(limit: int, user_id=None):
+    if user_id == None:
+        stmt = select(tables.posts_table)\
+            .order_by(desc(Column('post_time')))\
+            .limit(limit)
+    else:
+        stmt = select(tables.posts_table)\
+            .where(Column('author_id') == user_id)\
+            .limit(limit)
     try:
-        return await database.fetch_all(stmt)   #   возможно, не будет работать
+        return await database.fetch_all(stmt)
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при обращении к базе данных сообщений: {e}')
@@ -98,23 +99,22 @@ async def get_all_posts(limit: int):
 
 async def add_post(post: schemas.PostAdder):  # зашиваем id и name юзера в JWT токен
     stmt = insert(tables.posts_table)\
-            .returning(Column('id'))\
             .values(**post.model_dump())
     try:
-        result = await database.fetch_one(stmt)
+        result = await database.fetch_val(stmt)
         return result
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при записи данных в базу: {e}')
 
 
-async def edit_post(post: schemas.PostEditor):  # в POF по id из JWT вытаскиваем имя из БД
+async def edit_post(post: schemas.PostEditor):  # в POF по id из JWT вытаскиваем имя пользователя
     stmt = update(tables.posts_table)\
         .where(Column('id') == post.id)\
         .values(**post.model_dump(), is_edited=True)\
         .returning(Column('id'))
     try:
-        result = await database.fetch_one(stmt)
+        result = await database.fetch_val(stmt)
         return result
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -126,7 +126,7 @@ async def delete_post(post_id: int):  # на уровне POF проверить
         .where(Column('id') == post_id)\
         .returning(Column('id'))
     try:
-        result = await database.fetch_one(stmt)
+        result = await database.fetch_val(stmt)
         return result
     except DBAPIError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
