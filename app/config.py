@@ -16,6 +16,7 @@ class Config:
     secret_key: str
     algorithm: str
     jwt_expire_delta: int
+    dump_path: str
 
 
 def load_config(path: Optional[str] = None) -> Config:
@@ -25,7 +26,8 @@ def load_config(path: Optional[str] = None) -> Config:
         db_url=env("DB_URL"),
         secret_key=env("SECRET_KEY"),
         algorithm=env("ALGORITHM"),
-        jwt_expire_delta=int(env("JWT_EXPIRE_DELTA"))
+        jwt_expire_delta=int(env("JWT_EXPIRE_DELTA")),
+        dump_path=env("DUMP_PATH")
     )
 
 
