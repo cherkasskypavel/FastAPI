@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy.engine import Connection
 
+import app.exceptions.custom_exceptions as ce
 from app.db import schemas, crud
 from app.db.database import get_connection
 from app.security.security import get_user_from_token
@@ -26,8 +27,7 @@ async def get_user(user_id: int,
                    connection: Connection = Depends(get_connection)):
     user = crud.get_user(user_id, connection)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404,
-                            detail=f'Пользователя с ID {user_id} нет.')
+        raise ce.UserNotFoundException(detail=f'Пользователь с id {user_id} не найден!')
     return user
 
 
@@ -62,8 +62,7 @@ async def delete_post(post_id: int,
                       connection: Connection = Depends(get_connection)):
     db_post = crud.get_post(post_id, connection)
     if db_post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'Пост {post_id} не найден')
+        raise ce.PostNotFoundException(detail=f'Пост {post_id} не найден!')
     if not (user.role == 'admin' or db_post.author_id == user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Нельзя удалять не свой пост.')
@@ -84,8 +83,7 @@ async def edit_post(post_id: int,
     db_post = crud.get_post(post_id, connection)
 
     if db_post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'Пост {post_id} не найден')
+        raise ce.PostNotFoundException(detail=f'Пост {post_id} не найден!')
     if not (user.role == 'admin' or db_post.author_id == user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Нельзя редактировать не свой пост.')

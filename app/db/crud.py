@@ -5,8 +5,10 @@ from sqlalchemy import desc
 from sqlalchemy.engine import Connection
 from sqlalchemy.exc import DBAPIError
 
+import app.exceptions.custom_exceptions as ce
 from app.db import schemas, tables
 from app.security.passwd_cryptography import encrypt_pass
+
 
 
 # USERS ------------------------------------------------------------------
@@ -47,9 +49,7 @@ def create_user(user: schemas.UserCreate, connection: Connection) -> schemas.Use
     db_user = connection.execute(check_stmt)
     if db_user.fetchone():
         print(db_user.first())
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Пользователь с почтой {user.email} уже существует!')
+        raise ce.UserAlreadyExistsException(detail=f'Пользователь {user.email} уже существует!')
     try:
         res = connection.execute(insert_stmt).fetchone()
         connection.commit()
@@ -69,7 +69,7 @@ def get_all_users(limit: int, connection: Connection):
     try:
         return connection.execute(stmt).all()
     except DBAPIError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при обращении к базе данных пользователей: {e}')
 
 
