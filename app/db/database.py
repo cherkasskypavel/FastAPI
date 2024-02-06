@@ -12,12 +12,14 @@ from app.config import Config, load_config
 config: Config = load_config()
 
 metadata = MetaData()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global engine
     engine = create_engine(
         url=config.db_url,
-        echo=True
+        echo=True,
+        future=True
     )
     yield
     engine.dispose()
