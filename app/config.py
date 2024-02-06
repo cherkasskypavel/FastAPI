@@ -1,13 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-
 from environs import Env
-
-# SECRET_KEY = 'mysecret_key'
-# ALGORITHM = 'HS256'
-
-# JWT_EXPIRE_DELTA = 2    #   minutes
 
 
 @dataclass
@@ -17,6 +11,7 @@ class Config:
     algorithm: str
     jwt_expire_delta: int
     dump_path: str
+    async_db_url: str
 
 
 def load_config(path: Optional[str] = None) -> Config:
@@ -27,7 +22,8 @@ def load_config(path: Optional[str] = None) -> Config:
         secret_key=env("SECRET_KEY"),
         algorithm=env("ALGORITHM"),
         jwt_expire_delta=int(env("JWT_EXPIRE_DELTA")),
-        dump_path=env("DUMP_PATH")
+        dump_path=env("DUMP_PATH"),
+        async_db_url=env("ASYNC_DB_URL")
     )
 
 

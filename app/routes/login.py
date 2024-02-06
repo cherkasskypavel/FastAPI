@@ -4,10 +4,8 @@ from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 
-# from app.security.security import get_jwt_token
 from app.db import crud
 from app.db import schemas
-# from app.db.database import get_connection
 from app.security.security import authenticate_user
 
 
