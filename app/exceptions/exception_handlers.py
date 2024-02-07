@@ -1,4 +1,4 @@
-from fastapi import exception_handlers
+from fastapi import HTTPException, status
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
@@ -26,3 +26,7 @@ def custom_exception_a_handler(request: Request, exception: ce.PostNotFoundExcep
         status_code=exception.status_code,
         content={'error': exception.detail}
     )
+
+@app.exception_handler(ValueError)
+def value_error_handler(request: Request, exception: ValueError):
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(str(exception)))
