@@ -47,14 +47,16 @@ async def add_post(post: schemas.PostBase,
                             detail='Вам запрещено добавлять посты.')
     else:
         post_time = datetime.datetime.now()
-        result = crud.add_post(
-                schemas.PostAdder(**post.model_dump(),
-                                  author_id=user.id,
-                                  post_time=post_time),
-                connection=connection
-        )
-        return {'message': f'Пост {result} успешно добавлен!'}
-
+        try:
+            result = crud.add_post(
+                    schemas.PostAdder(**post.model_dump(),
+                                      author_id=user.id,
+                                      post_time=post_time),
+                    connection=connection
+            )
+            return {'message': f'Пост {result} успешно добавлен!'}
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @resource_.delete('/delete_post/{post_id}')
 async def delete_post(post_id: int,
@@ -89,10 +91,13 @@ async def edit_post(post_id: int,
                             detail='Нельзя редактировать не свой пост.')
     else:
         editor_name = user.email.split("@")[0]
-        result = crud.edit_post(
-            schemas.PostEditor(**post.model_dump(),
-                               id=post_id,
-                               edited_by=editor_name),
-            connection=connection
-        )
-        return {'message': f'Пост {result} отредактирован!'}
+        try:
+            result = crud.edit_post(
+                schemas.PostEditor(**post.model_dump(),
+                                   id=post_id,
+                                   edited_by=editor_name),
+                connection=connection
+            )
+            return {'message': f'Пост {result} отредактирован!'}
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

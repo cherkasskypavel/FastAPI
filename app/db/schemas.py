@@ -1,6 +1,9 @@
 from datetime import datetime
+import re
+import string
 from typing import Optional
 
+from pydantic import field_validator
 from pydantic import BaseModel
 
 
@@ -8,6 +11,21 @@ from pydantic import BaseModel
 class PostBase(BaseModel):
     subject: str
     text: str
+
+    @field_validator("subject")
+    @classmethod
+    def validate_subject(cls, value):
+        if not value:
+            raise ValueError('Тема сообщения не должна быть пустой!')
+        return value
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value):
+        if not (len(value) > 10 and set(value).intersection(string.ascii_letters)):
+            raise ValueError('Текст должен быть непустым и содержать хотябы одну букву!')
+        return value
+
 
 
 class PostAdder(PostBase):  # время добавления поста добавлять в функции БД
@@ -37,6 +55,14 @@ class Post(PostBase):
 class UserBase(BaseModel):  # Базовый класс
     email: str
 
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value):
+        template = r'.*@.*\.[a-z]{2, 3}'
+        if not re.compile(template).fullmatch(value):
+            raise ValueError("Некорректный эмейл!")
+        return value
+
 
 class UserReturn(UserBase):
     id: int
@@ -45,6 +71,25 @@ class UserReturn(UserBase):
 
 class UserCreate(UserBase):  # Для создания
     password: str
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value):
+        if not (
+            len(value) >= 8 and
+            set(value).intersection(string.ascii_uppercase) and
+            set(value).intersection(string.ascii_lowercase) and
+            set(value).intersection(string.digits) and
+            set(value).intersection(string.punctuation)
+        ):
+                raise ValueError("Пароль не соответствует следующим критериям:\n"
+                                 "1. Должен содержать более 8 символов\n"
+                                 "2. Должен содержать хотябы одну заглавную букву\n"
+                                 "3. Должен содержать хотябы одну прописную букву\n"
+                                 "4. Должен содержать хотябы одну цифру\n"
+                                 "5. Должен содержать хотябы один символ пунктуации\n")
+        else:
+            return value
 
 
 class UserRole(BaseModel):  # Для редактирования роли
