@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError, PydanticUserError
 
 from app.main import app
 import app.exceptions.custom_exceptions as ce
@@ -27,6 +28,11 @@ def custom_exception_a_handler(request: Request, exception: ce.PostNotFoundExcep
         content={'error': exception.detail}
     )
 
-@app.exception_handler(ValueError)
-def value_error_handler(request: Request, exception: ValueError):
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(str(exception)))
+
+##  Возможно, не работает из-за конфликтов с @field_validator
+# @app.exception_handler(ValueError)
+# def value_error_handler(request: Request, exception: ValidationError):
+#     return  JSONResponse(
+#         status_code=status.HTTP_400_BAD_REQUEST,
+#         content={'error': str(exception)}
+#     )

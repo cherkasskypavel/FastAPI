@@ -9,7 +9,8 @@ users_table = Table(
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('email', String, nullable=False, unique=True),
     Column('hashed_password', String, nullable=False),
-    Column('role', String)
+    Column('role', String),
+    Column('karma', Integer)
 )
 
 

@@ -57,9 +57,12 @@ class UserBase(BaseModel):  # Базовый класс
 
     @field_validator("email")
     @classmethod
-    def validate_email(cls, value):
-        template = r'.*@.*\.[a-z]{2, 3}'
+    def validate_email(cls, value: str):
+        template = r'.+@.+\.[a-z]{,3}'
+        print(value)
+        print(type(value))
         if not re.compile(template).fullmatch(value):
+            print(re.compile(template).findall(value))
             raise ValueError("Некорректный эмейл!")
         return value
 
@@ -83,7 +86,7 @@ class UserCreate(UserBase):  # Для создания
             set(value).intersection(string.punctuation)
         ):
                 raise ValueError("Пароль не соответствует следующим критериям:\n"
-                                 "1. Должен содержать более 8 символов\n"
+                                 "1. Должен содержать 8 или более символов\n"
                                  "2. Должен содержать хотябы одну заглавную букву\n"
                                  "3. Должен содержать хотябы одну прописную букву\n"
                                  "4. Должен содержать хотябы одну цифру\n"

@@ -49,7 +49,8 @@ def create_user(user: schemas.UserCreate, connection: Connection) -> schemas.Use
     db_user = connection.execute(check_stmt)
     if db_user.fetchone():
         print(db_user.first())
-        raise ce.UserAlreadyExistsException(detail=f'Пользователь {user.email} уже существует!')
+        raise ce.UserAlreadyExistsException(status_code=status.HTTP_400_BAD_REQUEST,
+                                            detail=f'Пользователь {user.email} уже существует!')
     try:
         res = connection.execute(insert_stmt).fetchone()
         connection.commit()

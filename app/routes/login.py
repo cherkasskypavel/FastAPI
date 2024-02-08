@@ -17,7 +17,7 @@ auth = APIRouter()
 @auth.post('/login')
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 connection: Connection = Depends(get_connection)):
-    user = await crud.get_user_by_email(form_data.username, connection=connection)
+    user = crud.get_user_by_email(form_data.username, connection=connection)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Пользователь {form_data.username} не найден.')
@@ -29,5 +29,5 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
 @auth.post('/signup')
 async def signup(user: schemas.UserCreate,
                  connection: Connection = Depends(get_connection)):
-    created_user = await crud.create_user(user, connection=connection)  # возвращаем id и эмейл
+    created_user = crud.create_user(user, connection=connection)  # возвращаем id и эмейл
     return {'message': f'Пользователь: {created_user.email}, id: {created_user.id}'}
