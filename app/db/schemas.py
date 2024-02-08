@@ -22,7 +22,7 @@ class PostBase(BaseModel):
     @field_validator("text")
     @classmethod
     def validate_text(cls, value):
-        if not (len(value) > 10 and set(value).intersection(string.ascii_letters)):
+        if not (len(value) > 0):
             raise ValueError('Текст должен быть непустым и содержать хотябы одну букву!')
         return value
 

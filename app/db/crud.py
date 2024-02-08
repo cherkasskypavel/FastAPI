@@ -86,9 +86,14 @@ def get_post(post_id: int, connection: Connection):
                             detail=f'Ошибка при обращении к базе данных постов: {e}')
 
 
-def get_all_posts(limit: int, connection: Connection):
-    stmt = select(tables.posts_table)\
-        .limit(limit)
+def get_all_posts(limit: int, connection: Connection, user_id=None):
+    if user_id is None:
+        stmt = select(tables.posts_table)\
+            .limit(limit)
+    else:
+        stmt = select(tables.posts_table)\
+            .where(Column('author_id') == user_id)\
+            .limit(limit)
     try:
         return connection.execute(stmt).mappings()
     except DBAPIError as e:
@@ -135,6 +140,3 @@ def delete_post(post_id: int, connection: Connection):  # на уровне POF 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f'Ошибка при удалении поста из базы данных: {e}')
 
-
-# def get_user_posts(user_id: int):
-#     pass

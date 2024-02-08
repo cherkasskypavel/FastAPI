@@ -1,11 +1,6 @@
-from typing import Union
-
-from fastapi import APIRouter
-from fastapi import HTTPException
 from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, Boolean
 
 from app.db.database import metadata
-
 
 
 users_table = Table(

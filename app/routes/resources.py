@@ -71,11 +71,6 @@ async def delete_post(post_id: int,
     return {'message': f'Пост {result} удален!'}
 
 
-# @resource_.get('/users/{user_id}/posts', response_model=List[schemas.Post])
-# async def get_user_posts(user_id: int, db: Session = Depends(get_db)):
-#     pass
-
-
 @resource_.patch('/posts/{post_id}')
 async def edit_post(post_id: int,
                     post: schemas.PostBase,
@@ -97,3 +92,10 @@ async def edit_post(post_id: int,
             connection=connection
         )
         return {'message': f'Пост {result} отредактирован!'}
+
+@resource_.get('/users/{user_id}/posts', response_model=Union[List[schemas.Post], dict])
+def get_user_posts(user_id: int, limit: int = 10, connection: Connection = Depends(get_connection)):
+    res = crud.get_all_posts(limit, connection=connection, user_id=user_id)
+    if not res:
+        raise ce.PostNotFoundException('Пользователь еще не добавлял посты!')
+    return res
