@@ -4,7 +4,6 @@ from alembic import context
 from sqlalchemy import create_engine
 from sqlalchemy import pool
 
-
 from app.config import load_config
 from app.db.database import metadata
 
