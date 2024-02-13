@@ -26,4 +26,5 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @auth.post('/signup')
 async def signup(user: schemas.UserCreate):
     created_user = await crud.create_user(user)  # возвращаем id и эмейл
-    return {'message': f'Пользователь: {created_user.email}, id: {created_user.id}'}
+    return {'message': f'Пользователь: {created_user.email}',
+            'id': f'{created_user.id}'}
