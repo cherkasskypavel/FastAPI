@@ -19,23 +19,24 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    ## Необходимо дописать constraints на default значения
     op.create_table(
         "users",
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('email', sa.String, nullable=False, unique=True),
         sa.Column('hashed_password', sa.String, nullable=False),
-        sa.Column('role', sa.String)
+        sa.Column('role', sa.String, server_default='user')
     )
+
+
     op.create_table(
         "posts",
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('subject', sa.String, nullable=False),
         sa.Column('text', sa.String, nullable=False),
-        sa.Column('author_id', sa.ForeignKey('users.id')),
+        sa.Column('author_id', sa.Integer, sa.ForeignKey('users.id')),
         sa.Column('post_time', sa.DateTime, nullable=False),
-        sa.Column('is_edited', sa.Boolean),
-        sa.Column('edited_by', sa.String)
+        sa.Column('is_edited', sa.Boolean, default=False),
+        sa.Column('edited_by', sa.String, server_default=None)
     )
 
 
