@@ -99,3 +99,8 @@ def get_user_posts(user_id: int, limit: int = 10, connection: Connection = Depen
     if not res:
         raise ce.PostNotFoundException('Пользователь еще не добавлял посты!')
     return res
+
+@resource_.get('/test_post', response_model=schemas.Post)
+def get_test_post(post_id: int, connection: Connection=Depends(get_connection)):
+    response = crud.get_post(post_id=post_id, connection=connection)
+    return response
