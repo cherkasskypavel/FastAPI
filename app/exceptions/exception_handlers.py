@@ -1,7 +1,5 @@
-from fastapi import HTTPException, status
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError, PydanticUserError
 
 from app.main import app
 import app.exceptions.custom_exceptions as ce
@@ -20,6 +18,7 @@ def custom_exception_a_handler(request: Request, exception: ce.UserAlreadyExists
         status_code=exception.status_code,
         content={'error': exception.detail}
     )
+
 
 @app.exception_handler(ce.PostNotFoundException)
 def custom_exception_a_handler(request: Request, exception: ce.PostNotFoundException):

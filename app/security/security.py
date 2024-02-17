@@ -6,6 +6,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+from pydantic import BaseModel
 
 from app.config import load_config, Config
 from app.db import schemas
@@ -15,7 +16,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 
 config: Config = load_config()
 
-def get_jwt_token(user: schemas.User, exp_delta: Union[int, None] = None):
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+
+def get_jwt_token(user: schemas.User, exp_delta: Union[int, None] = None) -> str:
     if not exp_delta:
         expire = datetime.utcnow() + timedelta(minutes=config.jwt_expire_delta)
     else:
@@ -51,4 +58,4 @@ def authenticate_user(user: schemas.User, password):
     if not verify_pass(password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Неверный пароль.')
-    return get_jwt_token(user)
+    return user
