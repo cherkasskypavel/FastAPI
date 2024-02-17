@@ -57,13 +57,15 @@ app.dependency_overrides[get_connection] = get_test_connection
 
 client = TestClient(app)
 
+test_token: str = ''
 
 @pt.fixture(scope='session', autouse=True)
 def create_test_db():
+    global test_token
     _testing_metadata.create_all()
     yield
     _testing_metadata.drop_all()
-
+    test_token = ''
 
 class TestApp:
     def test_user_list(self):
@@ -110,8 +112,8 @@ class TestSignup:
 
 
 class TestLogin:
-
     def test_success_login(self):
+        global test_token
         user_data = {'username': 'test1@testing.loc',
                      'password': '`1Aaaaaa',
                      'grant_type': 'password',
@@ -123,3 +125,17 @@ class TestLogin:
         assert response.status_code == status.HTTP_200_OK
         assert 'access_token' in response.json()
         assert response.json()['access_token']
+        test_token = response.json()['access_token']
+
+class TestPosts:
+
+    def test_succes_add_post(self):
+        headers = {
+            'Authorization': f'Bearer {test_token}'
+        }
+        data = {
+            'subject': 'test_subject',
+            'text': 'test_text'
+        }
+        response = client.post('/posts', headers=headers, json=data)
+        assert response.status_code == status.HTTP_200_OK

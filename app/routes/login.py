@@ -21,7 +21,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Пользователь {form_data.username} не найден.')
     else:
-        valid_user: schemas.User = authenticate_user(user, form_data.password)
+        valid_user = authenticate_user(user, form_data.password)
         if valid_user:
             jwt_token = get_jwt_token(valid_user)
             return {'access_token': jwt_token, 'token_type': 'bearer'}
