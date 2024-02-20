@@ -91,3 +91,9 @@ async def edit_post(post_id: int,
                                edited_by=editor_name)
         )
         return {'message': f'Пост {result} отредактирован!'}
+
+@resource_.get('/test_page')
+def get_test_page():
+    a = 3
+    b = 9
+    return a * b

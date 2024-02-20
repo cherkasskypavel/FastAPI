@@ -28,7 +28,7 @@ class Post(PostBase):
     id: int
     post_time: datetime
     author_id: int
-    is_edited: bool = False
+    is_edited: Optional[bool] = None
     edited_by: Optional[str] = None
 
 

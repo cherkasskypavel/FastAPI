@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import Column
 from sqlalchemy import delete, insert, select, update
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 from sqlalchemy.exc import DBAPIError
 
 from app.db import schemas, tables
@@ -83,8 +83,9 @@ async def get_post(post_id: int):
 
 async def get_all_posts(limit: int, user_id=None):
     if user_id == None:
+        #  Для тестов использую asc
         stmt = select(tables.posts_table)\
-            .order_by(desc(Column('post_time')))\
+            .order_by(asc(Column('post_time')))\
             .limit(limit)
     else:
         stmt = select(tables.posts_table)\
