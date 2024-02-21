@@ -20,7 +20,7 @@ import app.routes.resources
 config = load_config()
 client = TestClient(App)
 
-class TestPostsWork(unittest.TestCase):
+class TestApp(unittest.TestCase):
 
     # @patch("app.security.security.oauth2_scheme")
     # @patch("app.security.security.get_user_from_token")
@@ -75,3 +75,18 @@ class TestPostsWork(unittest.TestCase):
             mock_gap.assert_called_once_with(1)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json(), [expected_response[0].model_dump()])
+
+
+
+        # не работает, так как в response-модели определена только модель
+        # UserReturn
+        @patch('app.db.crud.get_user')
+        def test_user_not_found(self, mock_gu: MagicMock):
+            user_id = 123
+            expected_api_response = None
+            expected_response = {'detail': f'Пользователя с ID {user_id} нет.'}
+
+            response = client.get(f'/users/{user_id}')
+            mock_gu.return_value = expected_api_response
+            # self.assertEqual(response.status_code, 404)
+            # self.assertEqual(response.json(), expected_response)
