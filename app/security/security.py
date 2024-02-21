@@ -5,7 +5,7 @@ from fastapi import Depends
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
-import jwt
+import jose.jwt as jwt
 from pydantic import BaseModel
 
 from app.config import load_config
@@ -49,7 +49,7 @@ async def get_user_from_token(token_str: str = Depends(oauth2_scheme)):
                                      )
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is expired!')
-    except jwt.InvalidTokenError:
+    except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid!')
 
 
