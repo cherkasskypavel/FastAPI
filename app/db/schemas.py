@@ -3,8 +3,8 @@ import re
 import string
 from typing import Optional
 
-from pydantic import field_validator
 from pydantic import BaseModel
+from pydantic import field_validator
 
 
 # POSTS ---------------------------------------------------------------------

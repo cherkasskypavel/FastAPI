@@ -7,9 +7,9 @@ from fastapi import HTTPException
 from fastapi import status
 from sqlalchemy.engine import Connection
 
-import app.exceptions.custom_exceptions as ce
 from app.db import schemas, crud
 from app.db.database import get_connection
+import app.exceptions.custom_exceptions as ce
 from app.security.security import get_user_from_token
 
 
@@ -93,6 +93,7 @@ async def edit_post(post_id: int,
         )
         return {'message': f'Пост {result} отредактирован!'}
 
+
 @resource_.get('/users/{user_id}/posts', response_model=Union[List[schemas.Post], dict])
 def get_user_posts(user_id: int, limit: int = 10, connection: Connection = Depends(get_connection)):
     res = crud.get_all_posts(limit, connection=connection, user_id=user_id)
@@ -100,7 +101,8 @@ def get_user_posts(user_id: int, limit: int = 10, connection: Connection = Depen
         raise ce.PostNotFoundException('Пользователь еще не добавлял посты!')
     return res
 
+
 @resource_.get('/test_post', response_model=schemas.Post)
-def get_test_post(post_id: int, connection: Connection=Depends(get_connection)):
+def get_test_post(post_id: int, connection: Connection = Depends(get_connection)):
     response = crud.get_post(post_id=post_id, connection=connection)
     return response

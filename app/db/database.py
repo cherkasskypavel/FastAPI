@@ -13,6 +13,7 @@ config: Config = load_config()
 
 metadata = MetaData()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global engine
@@ -23,7 +24,6 @@ async def lifespan(app: FastAPI):
     )
     yield
     engine.dispose()
-
 
 
 def get_connection():

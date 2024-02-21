@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.main import app
 import app.exceptions.custom_exceptions as ce
 
+
 @app.exception_handler(ce.UserNotFoundException)
 def custom_exception_a_handler(request: Request, exception: ce.UserNotFoundException):
     return JSONResponse(

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
 
-
 from environs import Env
 
 

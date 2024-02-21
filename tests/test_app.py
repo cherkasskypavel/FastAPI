@@ -1,16 +1,16 @@
 
 from fastapi import status
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 import pytest as pt
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
-from pydantic import ValidationError
 
 
 import app.db.schemas as sc
-from app.main import app
 from app.db.database import get_connection
+from app.main import app
 from tests.testing_config import testing_config
 
 
@@ -59,6 +59,7 @@ client = TestClient(app)
 
 test_token: str = ''
 
+
 @pt.fixture(scope='session', autouse=True)
 def create_test_db():
     global test_token
@@ -66,6 +67,7 @@ def create_test_db():
     yield
     _testing_metadata.drop_all()
     test_token = ''
+
 
 class TestApp:
     def test_user_list(self):
@@ -126,6 +128,7 @@ class TestLogin:
         assert 'access_token' in response.json()
         assert response.json()['access_token']
         test_token = response.json()['access_token']
+
 
 class TestPosts:
 
