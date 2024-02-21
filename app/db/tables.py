@@ -3,7 +3,6 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, Boo
 from app.db.database import metadata
 
 
-
 users_table = Table(
     'users',
     metadata,

@@ -16,6 +16,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 
 config = load_config()
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str

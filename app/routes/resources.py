@@ -71,6 +71,7 @@ async def get_user_posts(user_id: int, limit: int = 10):
         return {'message': 'Пользователь еще не добавлял посты.'}
     return res
 
+
 @resource_.patch('/posts/{post_id}')
 async def edit_post(post_id: int,
                     post: schemas.PostBase,
@@ -91,6 +92,7 @@ async def edit_post(post_id: int,
                                edited_by=editor_name)
         )
         return {'message': f'Пост {result} отредактирован!'}
+
 
 @resource_.get('/test_page')
 def get_test_page():

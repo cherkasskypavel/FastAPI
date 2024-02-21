@@ -22,6 +22,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         token = await authenticate_user(user, form_data.password)
         return {'access_token': token, 'token_type': 'bearer'}
 
+
 @auth.post('/signup')
 async def signup(user: schemas.UserCreate):
     created_user = await crud.create_user(user)  # возвращаем id и эмейл

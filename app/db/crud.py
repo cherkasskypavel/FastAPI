@@ -82,7 +82,7 @@ async def get_post(post_id: int):
 
 
 async def get_all_posts(limit: int, user_id=None):
-    if user_id == None:
+    if user_id is None:
         #  Для тестов использую asc
         stmt = select(tables.posts_table)\
             .order_by(asc(Column('post_time')))\

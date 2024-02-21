@@ -1,24 +1,21 @@
 from datetime import datetime
 
+from fastapi.testclient import TestClient
+import pytest
 import unittest
 import unittest.mock
 from unittest.mock import MagicMock, patch
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import status
-from app.security.security import oauth2_scheme
 
 from app.config import load_config
 import app.db.schemas as sc
-import app.db.crud as crud
-from app.main import app as App
+from app.main import app as my_app
 import app.routes.login
 import app.routes.resources
 
 
-
 config = load_config()
-client = TestClient(App)
+client = TestClient(my_app)
+
 
 class TestApp(unittest.TestCase):
 
@@ -48,45 +45,42 @@ class TestApp(unittest.TestCase):
         # self.assertEqual(response.status_code, 200)
         # self.assertEqual(response.json(), expected_response)
 
+    @patch("app.db.crud.get_all_posts")
+    def test_get_user(self, mock_gap: MagicMock):
 
-        @patch("app.db.crud.get_all_posts")
-        def test_get_user(self, mock_gap: MagicMock):
+        expected_api_response = [
+            {
+                'id': 3,
+                'subject': 'test_subject',
+                'text': 'test_text',
+                'author_id': 9,
+                'post_time': datetime(year=2024, month=2, day=21),
+                'is_edited': None,
+                'edited_by': None
+            }
+        ]
+        expected_response = [sc.Post(**expected_api_response[0])]
+        expected_response[0].post_time = expected_api_response[0]['post_time'].isoformat()
 
-            expected_api_response = [
-                {
-                    'id': 3,
-                    'subject': 'test_subject',
-                    'text': 'test_text',
-                    'author_id': 9,
-                    'post_time': datetime(year=2024, month=2, day=21),
-                    'is_edited': None,
-                    'edited_by': None
-                }
-            ]
-            expected_response = [sc.Post(**expected_api_response[0])]
-            expected_response[0].post_time = expected_api_response[0]['post_time'].isoformat()
+        mock_gap.return_value = expected_api_response
 
-            mock_gap.return_value = expected_api_response
+        response = client.get('/posts?limit=1')
 
-            response = client.get('/posts?limit=1')
-
-
-            mock_gap.assert_called_once()
-            mock_gap.assert_called_once_with(1)
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json(), [expected_response[0].model_dump()])
+        mock_gap.assert_called_once()
+        mock_gap.assert_called_once_with(1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [expected_response[0].model_dump()])
 
 
+    # не работает, так как в response-модели определена только модель
+    # UserReturn
+    @patch('app.db.crud.get_user')
+    def test_user_not_found(self, mock_gu: MagicMock):
+        user_id = 123
+        expected_api_response = None
+        # expected_response = {'detail': f'Пользователя с ID {user_id} нет.'}
 
-        # не работает, так как в response-модели определена только модель
-        # UserReturn
-        @patch('app.db.crud.get_user')
-        def test_user_not_found(self, mock_gu: MagicMock):
-            user_id = 123
-            expected_api_response = None
-            expected_response = {'detail': f'Пользователя с ID {user_id} нет.'}
-
-            response = client.get(f'/users/{user_id}')
-            mock_gu.return_value = expected_api_response
-            # self.assertEqual(response.status_code, 404)
-            # self.assertEqual(response.json(), expected_response)
+        # response = client.get(f'/users/{user_id}')
+        mock_gu.return_value = expected_api_response
+        # self.assertEqual(response.status_code, 404)
+        # self.assertEqual(response.json(), expected_response)

@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 
 from databases import Database
-from sqlalchemy import MetaData
 from fastapi import FastAPI
+from sqlalchemy import MetaData
 
 from app.config import Config, load_config
 
