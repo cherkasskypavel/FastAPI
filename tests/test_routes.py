@@ -74,13 +74,34 @@ class TestApp(unittest.TestCase):
 
     # не работает, так как в response-модели определена только модель
     # UserReturn
-    @patch('app.db.crud.get_user')
-    def test_user_not_found(self, mock_gu: MagicMock):
-        user_id = 123
-        expected_api_response = None
+    # @patch('app.db.crud.get_user')
+    # def test_user_not_found(self, mock_gu: MagicMock):
+    #     user_id = 123
+        # expected_api_response = None
         # expected_response = {'detail': f'Пользователя с ID {user_id} нет.'}
 
         # response = client.get(f'/users/{user_id}')
-        mock_gu.return_value = expected_api_response
+        # mock_gu.return_value = expected_api_response
         # self.assertEqual(response.status_code, 404)
         # self.assertEqual(response.json(), expected_response)
+
+    @patch('app.db.crud.get_all_users')
+    def test_all_users_and_process_time(self, mock_gau: MagicMock):
+        expected_data = [
+            {
+                'email': 'expected@test.loc',
+                'id': 3,
+                'role': 'guest'
+            }
+        ]
+        limit = 1
+
+
+        mock_gau.return_value = expected_data
+
+        response = client.get('/users/?limit=1')
+
+        mock_gau.assert_called_once_with(1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_data)
+        self.assertIn('X-Process-Time', response.headers)
