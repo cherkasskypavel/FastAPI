@@ -59,3 +59,5 @@ async def authenticate_user(user: schemas.User, password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Неверный пароль.')
     return await get_jwt_token(user)
+
+
