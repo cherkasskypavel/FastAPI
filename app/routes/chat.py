@@ -12,6 +12,7 @@ from fastapi.websockets import WebSocketDisconnect
 import app.db.schemas as sc
 import app.security.security as sec
 import app.db.crud as crud
+import app.security.chat_security as cs
 
 templates = Jinja2Templates('templates')
 
@@ -27,6 +28,7 @@ async def load_chat_history(websocket: WebSocket):
     for msg in CHAT_HISTORY:
         await websocket.send_text('{} {}: {}'.format(*msg))
 
+
 @chat.post('/login')
 async def auth_chat(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await crud.get_user_by_email(form_data.username)
@@ -35,15 +37,23 @@ async def auth_chat(form_data: OAuth2PasswordRequestForm = Depends()):
                             detail=f'Пользователь {form_data.username} не найден.')
     else:
         token = await sec.authenticate_user(user, form_data.password)
-        # cookies = {'chat_cookie': token}
         response = Response(status_code=200)
         response.set_cookie(key='access_token', value=token)
         return response
+
+
 @chat.websocket('/start_chat')
 async def connect_to_chat(web_socket: WebSocket,
-                          token: str = Depends(sec.oauth2_scheme)):
+                          chat_token: str):
+
     await web_socket.accept()
-    user = await sec.get_user_from_token(token)
+
+    try:
+        user = await sec.get_user_from_token(chat_token)
+    except HTTPException as e:
+        await web_socket.send_text(f'Ошибка аутентификации: {e}')
+        await web_socket.close()
+        return
 
     CONNECTED_USERS.update(
         {web_socket: {'user_id': user.id}}
@@ -54,17 +64,18 @@ async def connect_to_chat(web_socket: WebSocket,
     await web_socket.send_text(GREETING.format(username))
     await load_chat_history(web_socket)
 
-    try:
-        msg_text = await web_socket.receive_text()
-        msg_time = datetime.now().strftime(__format=TIME_FORMAT)
-        new_msg = (msg_time, username, msg_text)
-        CHAT_HISTORY.append(new_msg)
-        for online_user in CONNECTED_USERS.keys():
-            await online_user.send_text('{} {}: {}'.format(*new_msg))
+    while True:
+        try:
+            msg_text = await web_socket.receive_text()
+            msg_time = datetime.now().strftime(__format=TIME_FORMAT)
+            new_msg = (msg_time, username, msg_text)
+            CHAT_HISTORY.append(new_msg)
+            for online_user in CONNECTED_USERS.keys():
+                await online_user.send_text('{} {}: {}'.format(*new_msg))
 
-    except WebSocketDisconnect:
-        del CONNECTED_USERS[web_socket]
-
+        except WebSocketDisconnect:
+            del CONNECTED_USERS[web_socket]
+            break
 
 @chat.get('/', response_class=HTMLResponse)
 async def get_chat_page(request: Request):
