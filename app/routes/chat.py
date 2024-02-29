@@ -46,8 +46,8 @@ async def auth_chat(form_data: OAuth2PasswordRequestForm = Depends()):
 async def connect_to_chat(web_socket: WebSocket,
                           chat_token: str):
 
+    print(chat_token)
     await web_socket.accept()
-
     try:
         user = await sec.get_user_from_token(chat_token)
     except HTTPException as e:
@@ -67,7 +67,8 @@ async def connect_to_chat(web_socket: WebSocket,
     while True:
         try:
             msg_text = await web_socket.receive_text()
-            msg_time = datetime.now().strftime(__format=TIME_FORMAT)
+            print('Сообщение получено')
+            msg_time = datetime.now().strftime(format=TIME_FORMAT)
             new_msg = (msg_time, username, msg_text)
             CHAT_HISTORY.append(new_msg)
             for online_user in CONNECTED_USERS.keys():

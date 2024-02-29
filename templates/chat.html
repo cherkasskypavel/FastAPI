@@ -6,7 +6,7 @@
 <body>
     <h1>Чат для флудения</h1>
     <h2 id="username">Привет, {{ username }}!</h2>
-    <button type="button" onclick="connectToChat()">Подключиться</button>
+<!--    <button type="button" onclick="connectToChat()">Подключиться</button>-->
     <div id="chatbox" style="border: 1px solid #ccc; width: 300px; height: 200px; overflow-y: scroll;"></div>
     <form>
         <input type="text" id="message" required>
@@ -27,7 +27,7 @@
         function connectToChat() {
             username = document.getElementById("username").value;
             let chat_cookie = getCookie("access_token")
-            if (username) {
+            if (true) {
                 socket = new WebSocket(`ws://localhost:8000/chat/start_chat?chat_token=${chat_cookie}`);
                 socket.onmessage = function(event) {
                     chatbox.innerHTML += event.data + "<br>";
@@ -44,11 +44,10 @@
             }
         }
 
-<!--        document.addEventListener("DOMContentLoaded", function(){-->
-<!--Fun1();-->
-<!--Func2();-->
+        document.addEventListener("DOMContentLoaded", function(){
+connectToChat();
 
-<!--}); -->
+});
 
 
 <!--       -->
